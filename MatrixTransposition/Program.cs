@@ -7,7 +7,7 @@ namespace MatrixTransposition
 {
     class Program
     {
-        private const int MatrixSize = 100000000;
+        private const int MatrixSize = (int)1E+8;
         private readonly int iterations;
 
         static readonly int[] Ns =
@@ -41,7 +41,7 @@ namespace MatrixTransposition
                 var m = new int[N, N];
                 FillRandomMatrix(m);
 #if DEBUG
-                //PrintMatrix(m);
+                PrintMatrix(m);
 #endif
                 ms.Add(m);
                 mos.Add(new int[N, N]);
@@ -54,7 +54,7 @@ namespace MatrixTransposition
             {
                 for (var j = 0; j < a.GetLength(1); j++)
                 {
-                    a[i, j] = rnd.Next(100);
+                    a[i, j] = rnd.Next();
                 }
             }
         }
@@ -74,12 +74,8 @@ namespace MatrixTransposition
         void NaiveTranspose(int[,] source, int[,] dest)
         {
             for (var i = 0; i < N; i++)
-            {
                 for (var j = 0; j < N; j++)
-                {
                     dest[j, i] = source[i, j];
-                }
-            }
         }
 
         void SmartTranspose(int[,] source, int[,] dest)
@@ -91,14 +87,9 @@ namespace MatrixTransposition
         {
             if (w * h <= 64)
             {
-                // transpose
                 for (var i = x; i < x + w; i++)
-                {
                     for (var j = y; j < y + h; j++)
-                    {
                         dest[j, i] = source[i, j];
-                    }
-                }
             }
             else if (w <= h)
             {
@@ -110,15 +101,15 @@ namespace MatrixTransposition
             {
                 var half = w / 2;
                 SmartTransposeRecursion(source, dest, x, y, half, h);
-                SmartTransposeRecursion(source, dest, x+half, y, w - half, h);
+                SmartTransposeRecursion(source, dest, x + half, y, w - half, h);
             }
         }
 
         void CheckTransposition(int[,] source, int[,] dest)
         {
-            for (var i = 0; i < source.GetLength(0); i++)
+            for (var i = 0; i < N; i++)
             {
-                for (var j = 0; j < source.GetLength(1); j++)
+                for (var j = 0; j < N; j++)
                 {
                     if (source[i, j] != dest[j, i])
                     {
@@ -131,7 +122,7 @@ namespace MatrixTransposition
         void TransposeAll()
         {
             GC.Collect();
-            
+
             var watch = new Stopwatch();
             watch.Start();
 
@@ -140,12 +131,12 @@ namespace MatrixTransposition
                 if (useNaive) NaiveTranspose(ms[i], mos[i]);
                 else SmartTranspose(ms[i], mos[i]);
 #if DEBUG
-                CheckTransposition(_ms[i], _mos[i]);
+                CheckTransposition(ms[i], mos[i]);
 #endif
             }
             watch.Stop();
 
-            Console.WriteLine("N={0}, Iterations={1}, Time={2}", N, iterations, watch.Elapsed.TotalMilliseconds * 1000000 / N / N / iterations);
+            Console.WriteLine("N={0}, Iterations={1}, Time={2}ns", N, iterations, watch.Elapsed.TotalMilliseconds * 1000000 / N / N / iterations);
         }
 
         static void Main(string[] args)
